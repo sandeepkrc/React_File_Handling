@@ -1,0 +1,81 @@
+###################  BASIC IDEA FOR FILE HANDLING IN REACT AND DJANGO   ==============    WORK IN PROGRESS===========================
+1. Decleare State for file field
+     
+     
+     file_upload :null ,// intIALLY NULL 
+ 
+ 
+ 
+ 
+ 2.
+ 
+ <label>
+                      file :
+                      <input type="file" 
+                      onChange={this.resource_files_handler}
+
+                      
+                      />
+                    </label>
+  =========================================================================================================
+ 3. handler function
+ 
+ 
+  resource_files_handler = (e)=>{
+    console.log("resource file ")
+    this.setState({ rfiles: e.target.files[0] });
+    // console.log("----",this.state.rfiles.name)
+
+  }
+  
+  
+  
+  
+  
+  
+  
+  ===========================================
+ 4.. onsubmit function 
+  
+  
+  resources = ()=> {
+    console.log(this.state.rfiles)
+    console.log("hello resources");
+    let obj = {
+      group_id: commonService.decrypt(JSON.parse(localStorage.getItem("gpid"))),
+      ref_name: this.state.title,
+      files: this.state.rfiles,
+      notes: this.state.notes,
+      user_id: this.props.currentUser.learnerId
+    }
+    UserServices.ResourceAdd(obj).then((res)=>{
+      console.log("res==========",res)
+
+    }).catch((error)=>{
+      console.log("error =",error)
+
+    })
+
+    // axios.post("http://127.0.0.1:8000/r/resource", { group_id: 126,
+    // ref_name: "FRONEND DATA",
+    // files: "TEXTSDJKF",
+    // notes: "NOTES FOR FRONTEBD",
+    // user_id: 2})
+    
+    //   .then(res => {
+    //     console.log("sandeep api ")
+    //      console.log(res);
+    //      console.log("sandeep=",res.data);
+    //    })
+
+  }
+
+  
+  
+  
+  
+  
+  ========GETTING IN BACKEND DRF================================
+  
+  
+  
