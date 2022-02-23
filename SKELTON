@@ -22,9 +22,8 @@
  
  
   resource_files_handler = (e)=>{
-    console.log("resource file ")
     this.setState({ rfiles: e.target.files[0] });
-    // console.log("----",this.state.rfiles.name)
+    console.log("----",e.target.files[0]['name'])// to get file name
 
   }
   
@@ -39,34 +38,20 @@
   
   
   resources = ()=> {
-    console.log(this.state.rfiles)
-    console.log("hello resources");
-    let obj = {
-      group_id: commonService.decrypt(JSON.parse(localStorage.getItem("gpid"))),
-      ref_name: this.state.title,
-      files: this.state.rfiles,
-      notes: this.state.notes,
-      user_id: this.props.currentUser.learnerId
-    }
-    UserServices.ResourceAdd(obj).then((res)=>{
+      const formData = new FormData();
+      formData.append("group_id", this.state.groupId);
+      formData.append("ref_name", this.state.title);
+      formData.append("files", this.state.rfiles);
+      formData.append("notes", this.state.notes);
+      formData.append("user_id", this.props.currentUser.learnerId);
+   
+    UserServices.ResourceAdd(formData).then((res)=>{
       console.log("res==========",res)
 
     }).catch((error)=>{
       console.log("error =",error)
 
     })
-
-    // axios.post("http://127.0.0.1:8000/r/resource", { group_id: 126,
-    // ref_name: "FRONEND DATA",
-    // files: "TEXTSDJKF",
-    // notes: "NOTES FOR FRONTEBD",
-    // user_id: 2})
-    
-    //   .then(res => {
-    //     console.log("sandeep api ")
-    //      console.log(res);
-    //      console.log("sandeep=",res.data);
-    //    })
 
   }
 
@@ -77,5 +62,30 @@
   
   ========GETTING IN BACKEND DRF================================
   
+  
+  class ResourceView(APIView):
+    serializer_class = ResourseSerializer
+    queryset = Resources.objects.all()
+    def post(self,request):
+        files=request.FILES.get('files') 
+        print(files)
+        print(files.name)
+        # decrypted_data = json.loads(enc_dec_obj.decrypt_text(request.data))
+        # serializer = self.serializer_class(instance=instance, data=decrypted_data)
+        public_url = upload_content_blob(settings.GOOGLE_CLOUD_STORAGE_BUCKET,files, files.name)
+        request.data["files"] = public_url  #reset the dictnory of key files with public url(text field)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+                serializer.save()
+                res={"status":"success",'message': 'Notes Save successfully'}
+                encrypted_data = enc_dec_obj.encrypt_text(json.dumps(res))
+                return Response({'data': encrypted_data})
+                # return Response({'data': serializer.data})
+        else:
+            res = {'status': 'false',
+                   'message': 'Some Error'}
+            encrypted_data = enc_dec_obj.encrypt_text(json.dumps(res))
+            return Response({"data":encrypted_data})
+     
   
   
